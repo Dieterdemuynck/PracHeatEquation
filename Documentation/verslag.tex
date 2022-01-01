@@ -1,0 +1,50 @@
+\documentclass[a4paper,kulak]{kulakarticle} %options: kul or kulak (default)
+
+\usepackage[dutch]{babel}
+
+\date{Academiejaar 2021 -- 2022}
+\address{
+  Bachelor Informatica \\
+  Numerieke Wiskunde \\
+  Koen Van Den Abeele / Nithin Govindarajan}
+\title{Practicum: De Warmtevergelijking}
+\author{Dieter Demuynck}
+
+
+\begin{document}
+
+\maketitle
+
+\section*{Inleiding}
+
+De warmtevergelijking is een redelijk gekende vergelijking. Hij kan worden geschreven als
+
+\begin{equation}
+	\frac{\partial u(\vec{x}, t)}{\partial t} = \alpha \Delta u(\vec{x}, t)
+\end{equation}
+
+waarbij $u(\vec{x}, t)$ de temperatuurverdeling op een positie $\vec{x} \in \Omega$ met $\Omega$ een domein, een tijdsinterval $t \in [0, T]$, de diffusiviteit en $\Delta$ de Laplaciaan is. Deze vergelijking wordt gebruikt om de diffusie van warmte in de ruimte en tijd te berekenen aan de hand van begin- en randvoorwaarden.  % TODO: Complete explanation
+
+\section{Warmtevergelijking in 1D}
+
+De één-dimensionale warmtevergelijking $u(x, t)$ kan gebruikt worden om de warmte te berekenen in simpele objecten, zoals een staaf. Om deze warmtevergelijking op te stellen, wordt de wet van Fourier gebruikt. % TODO: Reference!!!
+De wet van Fourier beweert dat de snelheid van de stroming van warmte per oppervlakte-eenheid $\vec{q}$, een vectorveld, door een oppervlakte proportioneel is met min de gradiënt van de warmteverdeling $u(\vec{x}, t)$. Dit geeft de vergelijking
+
+\begin{equation}
+	\vec{q} = - k \nabla u
+\end{equation}
+
+waarbij k de thermische geleidbaarheid is.
+In een één-dimensionaal stelsel wordt de positie voorgesteld door 1 coördinaat $x$, waardoor $q(x, t)$ een scalair veld wordt en de gradiënt $\nabla u (x, t)$ simpelweg een afgeleide naar $x$ wordt. Dus  wordt de vergelijking
+
+\begin{equation}
+	q = -k\frac{\partial u}{\partial x}
+\end{equation}
+
+
+
+\section*{Besluit}
+
+Afsluitende tekst.
+
+\end{document}
