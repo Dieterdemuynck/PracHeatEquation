@@ -1,6 +1,7 @@
 \documentclass[a4paper,kulak]{kulakarticle} %options: kul or kulak (default)
 
 \usepackage[dutch]{babel}
+\usepackage{amsmath}
 
 \date{Academiejaar 2021 -- 2022}
 \address{
@@ -41,7 +42,37 @@ In een één-dimensionaal stelsel wordt de positie voorgesteld door 1 coördinaa
 	q = -k\frac{\partial u}{\partial x}
 \end{equation}
 
+We definiëren nu ook de functie $Q(x, t)$ dat de interne warmte energie per eenheid volume van de staaf beschrijft op elk punt $x$ op tijdstip $t$. Wanneer er geen warmte wordt toegevoegd aan het systeem, is de snelheid van de verandering van de interne warmte energie per volume-eenheid $Q$ proportioneel met de snelheid van de verandering van de temperatuur $u$. Wanneer van een constante dichtheid en warmte capaciteit wordt uitgegaan, geldt dat
 
+\begin{equation}
+	\frac{\partial Q}{\partial t} = c \rho \frac{\partial u}{\partial t}
+\end{equation}
+
+waarbij $c$ de specifieke warmte capaciteit en $\rho$ de dichtheid van het materiaal. 
+Wanneer hierop de wet van behoud van energie wordt toegepast op een klein gebied rond elk punt x, concludeert men dat de afgeleide van $Q$ naar $t$ gelijk is aan min de afgeleide van $q$ naar $x$. In symbolen:
+
+\begin{equation}
+	\frac{\partial Q}{\partial t} = - \frac{\partial q}{\partial x}
+\end{equation}
+
+waaruit volgt dat
+
+\begin{equation}
+	\begin{split}
+	\frac{\partial u}{\partial t} &= - \frac{1}{c\rho} \frac{\partial q}{\partial x} \\
+	&= - \frac{1}{c\rho} \frac{\partial}{\partial x} 
+		\left( - k \frac{\partial u}{\partial x} \right) \\
+	&= \frac{k}{c\rho} \frac{\partial^2u}{\partial x^2}
+	\end{split}
+\end{equation}
+
+Stellen we $\alpha = \frac{k}{c \rho}$ geeft dit de warmtevergelijking in 1 dimensie
+
+\begin{equation}
+	\frac{\partial u(x, t)}{\partial t} = \alpha \frac{\partial^2u(x, t)}{\partial x^2}
+\end{equation}
+
+Hierbij noemt $\alpha$ de warmtediffusiviteit.
 
 \section*{Besluit}
 
