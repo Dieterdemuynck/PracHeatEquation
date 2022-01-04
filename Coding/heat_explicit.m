@@ -51,6 +51,7 @@ function [u, x, t] = heat_explicit(L, Nx, T, Nt, alpha, Tom)
     % Fourth:
     % calculate bigT. bigT is a very nice matrix who'll help us calculate
     % the rest of u. Say hi to bigT. He's pretty nice.
+    r = alpha * delta_t / (delta_x .^ 2);
     bigT = (2.*r-1) .* eye(Nx);
     for i = 2:Nx-1
         bigT(i, i-1) = r;
