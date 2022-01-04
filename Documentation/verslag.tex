@@ -2,6 +2,12 @@
 
 \usepackage[dutch]{babel}
 \usepackage{amsmath}
+\usepackage{tikz}
+% TikZ Stuffs
+\tikzset{every label/.style={font=\footnotesize,inner sep=1pt}}
+\newcommand{\stencilpt}[4][]{\node[circle,fill,draw,inner sep=1.5pt,label={above left:#4},#1] at (#2) (#3) {}}
+% End of TikZ Stuffs
+
 
 \date{Academiejaar 2021 -- 2022}
 \address{
@@ -18,7 +24,7 @@
 
 \section*{Inleiding}
 
-De warmtevergelijking is een redelijk gekende vergelijking. Hij kan worden geschreven als
+De warmtevergelijking is een redelijk gekende vergelijking in de fysica. Hij kan worden geschreven als
 
 \begin{equation}
 	\frac{\partial u(\vec{x}, t)}{\partial t} = \alpha \Delta u(\vec{x}, t)
@@ -28,6 +34,7 @@ waarbij $u(\vec{x}, t)$ de temperatuurverdeling op een positie $\vec{x} \in \Ome
 
 \section{Warmtevergelijking in 1D}
 
+\subsection{De vergelijking opstellen}
 De één-dimensionale warmtevergelijking $u(x, t)$ kan gebruikt worden om de warmte te berekenen in simpele objecten, zoals een staaf. Om deze warmtevergelijking op te stellen, wordt de wet van Fourier gebruikt. % TODO: Reference!!!
 De wet van Fourier beweert dat de snelheid van de stroming van warmte per oppervlakte-eenheid $\vec{q}$, een vectorveld, door een oppervlakte proportioneel is met min de gradiënt van de warmteverdeling $u(\vec{x}, t)$. Dit geeft de vergelijking
 
@@ -35,12 +42,12 @@ De wet van Fourier beweert dat de snelheid van de stroming van warmte per opperv
 	\vec{q} = - k \nabla u
 \end{equation}
 
-waarbij k de thermische geleidbaarheid is.
+waarbij k de warmtegeleidingscoëfficiënt is.
 In een één-dimensionaal stelsel wordt de positie voorgesteld door 1 coördinaat $x$, waardoor $q(x, t)$ een scalair veld wordt en de gradiënt $\nabla u (x, t)$ simpelweg een afgeleide naar $x$ wordt. Dus  wordt de vergelijking
 
-\begin{equation}
+\begin{equation*}
 	q = -k\frac{\partial u}{\partial x}
-\end{equation}
+\end{equation*}
 
 We definiëren nu ook de functie $Q(x, t)$ dat de interne warmte energie per eenheid volume van de staaf beschrijft op elk punt $x$ op tijdstip $t$. Wanneer er geen warmte wordt toegevoegd aan het systeem, is de snelheid van de verandering van de interne warmte energie per volume-eenheid $Q$ proportioneel met de snelheid van de verandering van de temperatuur $u$. Wanneer van een constante dichtheid en warmte capaciteit wordt uitgegaan, geldt dat
 
@@ -51,28 +58,119 @@ We definiëren nu ook de functie $Q(x, t)$ dat de interne warmte energie per een
 waarbij $c$ de specifieke warmte capaciteit en $\rho$ de dichtheid van het materiaal. 
 Wanneer hierop de wet van behoud van energie wordt toegepast op een klein gebied rond elk punt x, concludeert men dat de afgeleide van $Q$ naar $t$ gelijk is aan min de afgeleide van $q$ naar $x$. In symbolen:
 
-\begin{equation}
+\begin{equation*}
 	\frac{\partial Q}{\partial t} = - \frac{\partial q}{\partial x}
-\end{equation}
+\end{equation*}
 
 waaruit volgt dat
 
-\begin{equation}
+\begin{equation*}
 	\begin{split}
 	\frac{\partial u}{\partial t} &= - \frac{1}{c\rho} \frac{\partial q}{\partial x} \\
 	&= - \frac{1}{c\rho} \frac{\partial}{\partial x} 
 		\left( - k \frac{\partial u}{\partial x} \right) \\
 	&= \frac{k}{c\rho} \frac{\partial^2u}{\partial x^2}
 	\end{split}
-\end{equation}
+\end{equation*}
 
 Stellen we $\alpha = \frac{k}{c \rho}$ geeft dit de warmtevergelijking in 1 dimensie
 
 \begin{equation}
 	\frac{\partial u(x, t)}{\partial t} = \alpha \frac{\partial^2u(x, t)}{\partial x^2}
+	\label{eq:1D_heat}
 \end{equation}
 
-Hierbij noemt $\alpha$ de warmtediffusiviteit.
+Hierbij noemt $\alpha$ de warmtediffusiviteit. % TODO: Understand wtf is going on...
+
+\subsection{Expliciete numerieke simulatie}
+
+Om de één-dimensionale warmtevergelijking numeriek op te lossen zullen we gebruik maken van de formules voor voorwaartse differenties, en centrale differenties voor equidistante punten, elk voor de afgeleide in de tijd respectievelijk voor de (tweede) afgeleide in de ruimte. % TODO: Reference book p136
+We gebruiken de notatie $u_i^n = u(x_i, t_n)$ waarbij $x_i = i\Delta x$ voor $i = 0, 1, ..., N_x-1$ en $t_n = n\Delta t$ waarbij $n = 0, 1, ..., N_t - 1$. Hierbij is $N_x$ en $N_t$ het aantal waarden voor $x$ resp. $t$.
+Dan geldt:
+
+\begin{equation}
+	\partial_t u_i^n = \frac{u_i^{n+1} - u_i^n}{\Delta t} + O(\Delta t)
+	\label{eq:diff_time}
+\end{equation}
+
+\begin{equation}
+	\partial_{xx} u_i^n = \frac{u_{i-1}^n - 2 u_i^n + u_{i+1}^n}{\Delta x^2} + O(\Delta x^2)
+	\label{eq:diff_space}
+\end{equation}
+
+Deze formules zullen benaderend gelijk zijn na het weglaten van de termen binnenin de O-notatie. Die benaderende formules invullen in de warmtevergelijking \ref{eq:1D_heat} geeft dan:
+
+\begin{align*}
+	\frac{u_i^{n+1} - u_i^n}{\Delta t} &\approx \alpha \frac{u_{i-1}^n - 2 u_i^n + u_{i+1}^n}{\Delta x^2} \\
+	\Leftrightarrow \qquad u_i^{n+1} &\approx \frac{\alpha \Delta t}{\Delta x^2} u_{i-1}^n + \left( 1 - \frac{2 \alpha \Delta t}{\Delta x^2} \right) u_i^n + \frac{\alpha \Delta t}{\Delta x^2} u_{i+1}^n 
+\end{align*}
+
+Stel $r = \frac{\alpha \Delta t}{\Delta x^2}$, dan is deze vergelijking makkelijker te schrijven als
+
+\begin{equation}
+	u_i^{n+1} \approx r u_{i-1}^n + \left( 1 - 2r \right) u_i^n + r u_{i+1}^n 
+\end{equation}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[scale=2]
+	\stencilpt[red]{-1, 0}{i-1}{$u_{i-1}^n$};
+	\stencilpt[red]{0, 0}{i}{$u_i^n$};
+	\stencilpt[red]{1, 0}{i+1}{$u_{i+1}^n$};
+	\stencilpt{0, 1}{j+1}{$u_i^{n+1}$};
+	
+	\draw (i-1) -- (i)
+	(i)	-- (i+1)
+	(i)	-- (j+1);
+\end{tikzpicture}
+\label{fig:stencil_diff};
+\caption{Stencil voor het berekenen van een waarde $u_i^{n+1}$ op een volgend tijdstip met index n+1}
+\end{figure}
+
+Dit is een formule om de warmte op een punt x op volgend tijdstip te berekenen aan de hand van de warmte in het punt x, links van x en recht van x op het huidig tijdstip. Figuur \ref{fig:stencil_diff} geeft een grafische voorstelling van deze bewerking onder de vorm van een stencil. \\
+Deze recursieve formule kan worden genoteerd als een matrix matrixvermenigvuldiging
+\begin{equation}
+	% MATRIX T
+	\begin{bmatrix}
+		\qquad \\
+		T \\
+		\\ 
+	\end{bmatrix}
+	% CURRENT VERTEX
+	\begin{bmatrix}
+		u_0^n \\
+		\vdots \\
+		u_{N_x - 1}^n
+	\end{bmatrix}
+	=
+	% NEXT VERTEX
+	\begin{bmatrix}
+		u_0^{n+1} \\
+		\vdots \\
+		u_{N_x - 1}^{n+1}
+	\end{bmatrix}	
+\end{equation}
+
+Hierbij is $T$ een matrix waarbij de diagonaalelementen gelijk zijn aan $1-2r$ en alle elementen net boven en onder de diagonaal zijn dan gelijk aan $r$. Alle andere elementen zijn gelijk aan nul.
+
+\begin{equation}
+	\begin{bmatrix}
+		\qquad \\
+		T \\
+		\\ 
+	\end{bmatrix}
+	=
+	\begin{bmatrix}
+		1-2r	&	r		&	0		&	\dots	&	0 		\\
+		r		&	1-2r	&	r		&	\dots	&	0		\\
+		0		&	r		&	1-2r	&	\dots	&	0		\\
+		\vdots	&	\vdots	&	\vdots	&	\ddots	&	\vdots	\\
+		0		&	0		&	0		&	\dots	&	1-2r	\\
+		\\ 
+	\end{bmatrix}
+\end{equation}
+
+Merk op dat er een probleem optreed bij de randwaarden, waar $i = 0$ en $i = N_x-1$. Om bijvoorbeeld $u_0^{n+1}$ te berekenen, hebben we waarden nodig die buiten het toegelaten interval voor x liggen. Echter is dit geen probleem, aangezien deze elementen gekend zijn door de opgelegde randvoorwaarden en dus hoeven ze niet berekend te worden a.d.h.v. de recursieformule.
 
 \section*{Besluit}
 
