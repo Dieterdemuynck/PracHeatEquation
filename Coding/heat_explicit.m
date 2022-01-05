@@ -31,11 +31,9 @@ function [u, x, t] = heat_explicit(L, Nx, T, Nt, alpha, Tom)
     t = 0:delta_t:T;
 
     % Secondly: we set up the first column of the output u, which should be
-    % the initial values. (Emphasis on 'should', if you don't mess up on
-    % how to properly call the function)
-    % Note: x (and t) are rows, not columns. We want columns, so we have to
-    % transpose the matrix. We also fill up the matrix with a whole lotta
-    % zeros to preallocate some space for the entire resulting matrix.
+    % the initial values.
+    % We fill up the matrix with a whole lotta zeros to preallocate
+    % some space for the entire resulting matrix.
     u = zeros(Nx, Nt);
     u(:, 1) = initval(x);
     
@@ -44,9 +42,7 @@ function [u, x, t] = heat_explicit(L, Nx, T, Nt, alpha, Tom)
     % at the edges, it's because something is /very obviously wrong/
     assert(u(1) == 0, "initial value at 0 must be 0", u);
     assert(u(Nx) == Tom, "Edge value at endpoint must be ambient temperature", u);
-    % Note: if I was allowed to edit the functions input, I could have been
-    % able to create an optional argument with which I can turn this check
-    % off, potentially to avoid rounding errors being the cause.
+    % Note: a rounding error may cause issues.
 
     % Fourth:
     % calculate bigT. bigT is a very nice matrix who'll help us calculate
@@ -67,6 +63,6 @@ function [u, x, t] = heat_explicit(L, Nx, T, Nt, alpha, Tom)
         u(:, n) = bigT * u(:, n-1);
         % Remember: we set the outer values to 0 and Tom!
         u(1, n) = 0;
-        u(Nx, n) = Tom;
+        u(Nx, n) = Tom; % Tom doesn't like bigT very much...
     end
 end
