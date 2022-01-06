@@ -7,7 +7,14 @@
 \tikzset{every label/.style={font=\footnotesize,inner sep=1pt}}
 \newcommand{\stencilpt}[4][]{\node[circle,fill,draw,inner sep=1.5pt,label={above left:#4},#1] at (#2) (#3) {}}
 % End of TikZ Stuffs
-
+\usepackage{listings}
+% Let's hope this works
+\newcommand{\inputcode}[1]{
+	\lstinputlisting[language=Octave]{C:/Users/diete/Documents/Uni Docs/Numerieke Wiskunde/PracHeatEquation/Coding/#1.m}
+}
+\usepackage{appendix}
+\usepackage{float}
+\usepackage{url}
 
 \date{Academiejaar 2021 -- 2022}
 \address{
@@ -85,6 +92,12 @@ Hierbij noemt $\alpha$ de warmtediffusiviteit. % TODO: Understand wtf is going o
 \subsection{Expliciete numerieke simulatie}
 
 Om de één-dimensionale warmtevergelijking numeriek op te lossen zullen we gebruik maken van de formules voor voorwaartse differenties, en centrale differenties voor equidistante punten, elk voor de afgeleide in de tijd respectievelijk voor de (tweede) afgeleide in de ruimte. % TODO: Reference book p136
+We noemen deze methode expliciet wegens de manier waarop we elke waarde op een volgend tijdstip berekenen. Uiteindelijk bekomen we een formule van de vorm % TODO: reference wikipedia explicit vs implicit
+
+\begin{equation*}
+	Y(t + \Delta t) = F(Y(t))
+\end{equation*}
+
 We gebruiken de notatie $u_i^n = u(x_i, t_n)$ waarbij $x_i = i\Delta x$ voor $i = 0, 1, ..., N_x-1$ en $t_n = n\Delta t$ waarbij $n = 0, 1, ..., N_t - 1$. Hierbij is $N_x$ en $N_t$ het aantal waarden voor $x$ resp. $t$.
 Dan geldt:
 
@@ -94,21 +107,22 @@ Dan geldt:
 \end{equation}
 
 \begin{equation}
-	\partial_{xx} u_i^n = \frac{u_{i-1}^n - 2 u_i^n + u_{i+1}^n}{\Delta x^2} + O(\Delta x^2)
+	\partial_{xx} u_i^n = \frac{u_{i-1}^n - 2 u_i^n + u_{i+1}^n}{(\Delta x)^2} + O((\Delta x)^2)
 	\label{eq:diff_space}
 \end{equation}
 
 Deze formules zullen benaderend gelijk zijn na het weglaten van de termen binnenin de O-notatie. Die benaderende formules invullen in de warmtevergelijking \ref{eq:1D_heat} geeft dan:
 
 \begin{align*}
-	\frac{u_i^{n+1} - u_i^n}{\Delta t} &\approx \alpha \frac{u_{i-1}^n - 2 u_i^n + u_{i+1}^n}{\Delta x^2} \\
-	\Leftrightarrow \qquad u_i^{n+1} &\approx \frac{\alpha \Delta t}{\Delta x^2} u_{i-1}^n + \left( 1 - \frac{2 \alpha \Delta t}{\Delta x^2} \right) u_i^n + \frac{\alpha \Delta t}{\Delta x^2} u_{i+1}^n 
+	\frac{u_i^{n+1} - u_i^n}{\Delta t} &\approx \alpha \frac{u_{i-1}^n - 2 u_i^n + u_{i+1}^n}{(\Delta x)^2} \\
+	\Leftrightarrow \qquad u_i^{n+1} &\approx \frac{\alpha \Delta t}{(\Delta x)^2} u_{i-1}^n + \left( 1 - \frac{2 \alpha \Delta t}{(\Delta x)^2} \right) u_i^n + \frac{\alpha \Delta t}{(\Delta x)^2} u_{i+1}^n 
 \end{align*}
 
-Stel $r = \frac{\alpha \Delta t}{\Delta x^2}$, dan is deze vergelijking makkelijker te schrijven als
+Stel $r = \frac{\alpha \Delta t}{(\Delta x)^2}$, dan is deze vergelijking makkelijker te schrijven als
 
 \begin{equation}
 	u_i^{n+1} \approx r u_{i-1}^n + \left( 1 - 2r \right) u_i^n + r u_{i+1}^n 
+	\label{eq:expl_recursive}
 \end{equation}
 
 \begin{figure}
@@ -123,11 +137,11 @@ Stel $r = \frac{\alpha \Delta t}{\Delta x^2}$, dan is deze vergelijking makkelij
 	(i)	-- (i+1)
 	(i)	-- (j+1);
 \end{tikzpicture}
-\label{fig:stencil_diff};
+\label{fig:stencil_explicit};
 \caption{Stencil voor het berekenen van een waarde $u_i^{n+1}$ op een volgend tijdstip met index n+1}
 \end{figure}
 
-Dit is een formule om de warmte op een punt x op volgend tijdstip te berekenen aan de hand van de warmte in het punt x, links van x en recht van x op het huidig tijdstip. Figuur \ref{fig:stencil_diff} geeft een grafische voorstelling van deze bewerking onder de vorm van een stencil. \\
+Dit is een formule om de warmte op een punt x op volgend tijdstip te berekenen aan de hand van de warmte in het punt x, links van x en recht van x op het huidig tijdstip. Figuur \ref{fig:stencil_explicit} geeft een grafische voorstelling van deze bewerking onder de vorm van een stencil. \\
 Deze recursieve formule kan worden genoteerd als een matrix matrixvermenigvuldiging
 \begin{equation}
 	% MATRIX T
@@ -151,7 +165,7 @@ Deze recursieve formule kan worden genoteerd als een matrix matrixvermenigvuldig
 	\end{bmatrix}	
 \end{equation}
 
-Hierbij is $T$ een matrix waarbij de diagonaalelementen gelijk zijn aan $1-2r$ en alle elementen net boven en onder de diagonaal zijn dan gelijk aan $r$. Alle andere elementen zijn gelijk aan nul.
+Hierbij is $T$ een matrix waarbij de diagonaalelementen gelijk zijn aan $1-2r$ en alle elementen net boven en onder de diagonaal zijn dan gelijk aan $r$. Alle andere elementen zijn gelijk aan nul. Dit soort matrices, met elementen verschillend van nul op, boven en onder de diagonaal met alle andere elementen gelijk aan nul, noemt men in het Engels een "tridiagonal matrix".
 
 \begin{equation}
 	\begin{bmatrix}
@@ -170,10 +184,184 @@ Hierbij is $T$ een matrix waarbij de diagonaalelementen gelijk zijn aan $1-2r$ e
 	\end{bmatrix}
 \end{equation}
 
-Merk op dat er een probleem optreed bij de randwaarden, waar $i = 0$ en $i = N_x-1$. Om bijvoorbeeld $u_0^{n+1}$ te berekenen, hebben we waarden nodig die buiten het toegelaten interval voor x liggen. Echter is dit geen probleem, aangezien deze elementen gekend zijn door de opgelegde randvoorwaarden en dus hoeven ze niet berekend te worden a.d.h.v. de recursieformule.
+Merk op dat er een probleem optreed bij de randwaarden, waar $i = 0$ en $i = N_x-1$. Om bijvoorbeeld $u_0^{n+1}$ te berekenen, zijn er waarden nodig die buiten het toegelaten interval voor x liggen. Echter is dit geen probleem, aangezien deze elementen gekend zijn door de opgelegde randvoorwaarden en hoeven ze dus niet berekend te worden a.d.h.v. de recursieformule.
+
+\subsection{Implementatie bij constante randvoorwaarden}
+\label{sec:impl_expl_constant}
+
+De implementatie \path{heat_explicit.m} (zie Appendix \ref{code:heat_explicit}) voor het numeriek berekenen van de warmtevergelijking in 1D werkt als volgt: \\
+De lengte van de staaf, de tijd tot wanneer we de warmteverspreiding willen simuleren en het aantal stappen, samen met de diffusiviteit van de staaf worden allen ingegeven als constanten. De constante randvoorwaarde $u = T_{om}$ wordt gevraagd voor positie $x = L$ voor alle $t \in [0, T]$, en op positie $x = 0$ wordt ervan uitgegaan dat daar de constante randvoorwaarde $u = 0$ geldt voor alle $t \in [0, T]$. De beginvoorwaarden worden niet rechtstreeks meegegeven, maar eerder als een aparte functie \path{initval(x)} die bij het document zit. Er wordt gevraagd dat deze functie de positie $x$ afbeeldt op de begintemperatuur van de staaf op die positie. De functie \path{heat_explicit} zal zelf de randvoorwaarden gebruiken om de initiële waarden te overschrijven, zodat de gebruiker niet per se een functie moet opstellen die aan deze randvoorwaarden voldoet.
+
+\subsection{Implementatie bij convectie-randvoorwaarde}
+
+Stel dat op $x = 0$ de randvoorwaarde een convectie vergelijking is, zoals
+
+\begin{equation*}
+	\frac{\partial u(0, t)}{\partial x} = \frac{H}{K}\left[u(0, t) - T_{omgeving}\right]
+\end{equation*}
+
+Bij het toepassen van centrale differenties op de afgeleide in bovenstaande vergelijking geldt:
+
+\begin{equation*}
+	\partial_x u_0^n = \frac{u_1^n - u_{-1}^n}{2(\Delta x)^2}
+\end{equation*}
+
+waardoor
+
+\begin{align*}
+	\frac{u_1^n - u_{-1}^n}{2(\Delta x)^2} &= \frac{H}{K}\left[u(0, t) - T_{omgeving}\right] \\
+	\Leftrightarrow \qquad
+	u_{-1}^n &= 
+	\frac{2 H (\Delta x)^2}{K} T_{omgeving} 
+	- \frac{2 H (\Delta x)^2}{K} u_0^n
+	+ u_1^n
+\end{align*}
+
+Stel $q = \frac{2 H (\Delta x)^2}{K}$, dan is de vergelijking te schrijven als
+
+\begin{equation}
+	u_{-1}^n = q T_{omgeving} - q u_0^n + u_1^n
+	\label{eq:convection_diff}
+\end{equation}
+
+Als we formule \ref{eq:expl_recursive} toepassen op $u_0^n$ bekomen we
+
+\begin{equation*}
+	u_0^{n+1} \approx r u_{-1}^n + \left( 1 - 2r \right) u_0^n + r u_1^n 
+\end{equation*}
+
+Wanneer we daarin vergelijking \ref{eq:convection_diff} toepassen, resulteert dit in
+
+\begin{align*}
+	u_0^{n+1} 
+	&\approx r \left(q T_{omgeving} - q u_0^n + u_1^n\right) 
+	+ \left( 1 - 2r \right) u_0^n 
+	+ r u_1^n \\
+	&\approx 2 r u_1^n
+	+ ( - q r + 1 - 2 r ) u_0^n
+	+ r q T_{omgeving} \\
+	&\approx 2 r u_1^n
+	+ (1 - (2 + q)r) u_0^n
+	+ r q T_{omgeving}
+\end{align*}
+
+Door gebruik te maken van de beginvoorwaarde in $u(0, 0)$ kunnen we zo dus recursief de temperatuur op een volgend tijdstip op positie 0 berekenen. Door de eerste twee elementen op de eerste rij van de matrix $T$ aan te passen naar $(1 - (2 + q)r)$ voor het eerste element en $2r$ voor het tweede, deze matrix te vermenigvuldigen met de temperatuurvector op het huidig tijdstip, en daarna bij het eerste element (wat de temperatuur op positie $x = 0$ op een volgend tijdstip voorstelt) nog $r q T_{omgeving}$ op te tellen, bekomen we onmiddellijk de correcte temperatuur. \\
+De implementatie zal dan ook verschillen met de implementatie bij constante randvoorwaarden \ref{code:heat_explicit}(zie sectie \ref{sec:impl_expl_constant}) enkel en alleen bij de stappen uitgelegd in vorige paragraaf. De code voor deze implementatie is te vinden in appendix \ref{code:convheat_explicit}.
+
+\subsection{Impliciete numerieke simulatie}
+
+Naast de expliciete methode zoals eerder vermeld is er ook een impliciete methode om de waarden op een volgend tijdstip te berekenen. Deze methode geeft ons dan een vergelijking van de vorm
+
+\begin{equation*}
+	G(Y(t + \Delta t), Y(t)) = 0
+\end{equation*}
+
+Om deze vergelijk op te stellen gebruiken we centrale differenties voor de (tweede) afgeleide in beide tijd en ruimte in de warmtevergelijking \ref{eq:1D_heat}. We discretiseren de vergelijking telkens op halve tijdstippen $t = (j + 1/2) \Delta t$, waardoor de centrale differenties voor de tijdsafgeleide steeds hele tijdstippen $t = \Delta t$ gebruikt. Dit zorgt echter voor problemen voor de differenties van de ruimtelijke afgeleide, aangezien we geen waarden hebben voor deze halve tijdstippen. Om deze waarden te benaderen gebruiken we de methode van Lax, die deze benadering berekend door het gemiddelde te nemen van de aangrenzende waarden:
+
+\begin{equation}
+	u_i^{t + 1/2} \approx \frac{u_i^t + u_i^{t + 1}}{2}
+	\label{eq:lax_method}
+\end{equation}
+
+De centrale differenties voor de afgeleiden geeft dan volgende vergelijkingen
+
+\begin{align*}
+	\partial_t u_i^{n+\frac{1}{2}} 
+	&= \frac{u_i^{n+1} - u_i^n}{2\Delta t} + O((\Delta t)^2)
+\end{align*}
+
+\begin{align*}
+	\partial_{xx} u_i^{n+\frac{1}{2}} 
+	&= \frac{u_{i-1}^{n+\frac{1}{2}} - 2 u_i^{n+\frac{1}{2}} + u_{i+1}^{n+\frac{1}{2}}}{(\Delta x)^2} + O((\Delta x)^2) \\
+	&= \frac{u_{i-1}^{n+1} - 2 u_i^{n+1} + u_{i+1}^{n+1} + u_{i-1}^n - 2 u_i^n + u_{i+1}^n}{2(\Delta x)^2} + O((\Delta x)^2)
+\end{align*}
+
+Deze formules ingeven in de warmtevergelijking \ref{eq:1D_heat} en de hogere orde termen te verwaarlozen resulteert in:
+
+\begin{equation*}
+	\frac{u_i^{n+1} - u_i^n}{\Delta t}
+	\approx
+	\alpha \frac{u_{i-1}^{n+1} - 2 u_i^{n+1} + u_{i+1}^{n+1} + u_{i-1}^n - 2 u_i^n + u_{i+1}^n}{(\Delta x)^2}
+\end{equation*}
+
+Stel $r = \frac{\alpha \Delta t}{(\Delta x)^2}$, dan is deze vergelijking gelijk aan
+
+\begin{equation*}
+	- r u_{i-1}^{n+1}
+	+ \left(1 + 2r\right) u_i^{n+1}
+	- r u_{i+1}^{n+1}
+	\approx
+	r u_{i-1}^n
+	+ \left(1 - 2 r\right) u_i^n
+	+ r u_{i+1}^n
+\end{equation*}
+
+Deze vergelijking kunnen we dan in matrixvorm schrijven als
+
+\begin{equation}
+	% MATRIX T
+	\begin{bmatrix}
+		\qquad \\
+		A \\
+		\\ 
+	\end{bmatrix}
+	% CURRENT VERTEX
+	\begin{bmatrix}
+		u_0^{n+1} \\
+		\vdots \\
+		u_{N_x - 1}^{n+1}
+	\end{bmatrix}
+	=
+	% NEXT VERTEX
+	\begin{bmatrix}
+		b_0^n \\
+		\vdots \\
+		b_{N_x - 1}^n
+	\end{bmatrix}	
+\end{equation}
+
+waarbij
+
+\begin{equation*}
+	\begin{bmatrix}
+		\qquad \\
+		A \\
+		\\ 
+	\end{bmatrix}
+	=
+	\begin{bmatrix}
+		1+2r	&	-r		&	0		&	\dots	&	0 		\\
+		-r		&	1+2r	&	-r		&	\dots	&	0		\\
+		0		&	-r		&	1+2r	&	\dots	&	0		\\
+		\vdots	&	\vdots	&	\vdots	&	\ddots	&	\vdots	\\
+		0		&	0		&	0		&	\dots	&	1+2r	\\
+		\\ 
+	\end{bmatrix}
+\end{equation*}
+
+en
+
+\begin{equation*}
+	b_i^n = (1-2r)u_i^n + r(u_{i-1}^n + u_{i+1}^n)
+\end{equation*}
+
+Merk weer op dat dit problemen veroorzaakt op de rand van het ruimtelijk interval, maar opnieuw zal dit niet belangrijk zijn dankzij de opgelegde randvoorwaarden.
 
 \section*{Besluit}
 
 Afsluitende tekst.
+
+\section*{Appendices}
+
+\appendix
+
+\section{File: heat\textunderscore explicit.m}
+	\label{code:heat_explicit}
+	\inputcode{heat_explicit}
+	
+\section{File: convheat\textunderscore explicit.m}
+	\label{code:convheat_explicit}
+	\inputcode{convheat_explicit}
+	
 
 \end{document}
