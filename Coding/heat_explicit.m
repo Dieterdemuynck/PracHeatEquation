@@ -17,38 +17,23 @@ function [u, x, t] = heat_explicit(L, Nx, T, Nt, alpha, Tom)
     % initval(x), a function which maps each position x between 0 and L to
     % the respective initial temperature value of the rod at position x.
 
-    % I notice there's no argument for the initial temperature values.
-    % Which is absolute bonkers, in my opinion. This means I have to use
-    % global variables (or rather a global "function") to send initial
-    % values to this function. FYI, global vars are generally bad practice.
-    % Don't do globals, kids.
-
-    % First off: transform the continuous intervals for x and t to discreet
-    % points:
-    delta_x = L/(Nx-1); % Hey look, we can use these to calculate r
-    delta_t = L/(Nt-1);
+    % 1. continuous intervals to discrete points for x and t
+    delta_x = L/(Nx-1);
+    delta_t = T/(Nt-1);
     x = 0:delta_x:L;
     t = 0:delta_t:T;
 
-    % Secondly: we set up the first column of the output u, which should be
-    % the initial values.
-    % We fill up the matrix with a whole lotta zeros to preallocate
-    % some space for the entire resulting matrix.
+    % 2. Calculate first column of u
     u = zeros(Nx, Nt);
     u(:, 1) = initval(x);
     
-    % Third, we assert whether the edge conditions are actually valid.
-    % If the function were to return different values than the edge values
-    % at the edges, it's because something is /very obviously wrong/
-    assert(u(1) == 0, "initial value at 0 must be 0", u);
-    assert(u(Nx) == Tom, "Edge value at endpoint must be ambient temperature", u);
-    % Note: a rounding error may cause issues.
+    % 3. Set edge values to correct values
+    u(1, 1) = 0;
+    u(Nx, 1) = Tom;
 
-    % Fourth:
-    % calculate bigT. bigT is a very nice matrix who'll help us calculate
-    % the rest of u. Say hi to bigT. He's pretty nice.
-    r = alpha * delta_t / (delta_x .^ 2);
-    bigT = (2.*r-1) .* eye(Nx);
+    % 4. Calculate the matrix bigT
+    r = alpha .* delta_t / (delta_x .^ 2);
+    bigT = (1-2.*r) .* eye(Nx);
     for i = 2:Nx-1
         bigT(i, i-1) = r;
         bigT(i, i+1) = r;
@@ -57,12 +42,11 @@ function [u, x, t] = heat_explicit(L, Nx, T, Nt, alpha, Tom)
     % these do not matter, as we'll set them to the border conditions
     % (either 0 or Tom).
 
-    % Fifth:
-    % Calculate the rest of u.
+    % 5. Calculate the rest of matrix u using matrix bigT
     for n = 2:Nt
         u(:, n) = bigT * u(:, n-1);
-        % Remember: we set the outer values to 0 and Tom!
+        % Remember: we set the outer values to 0 and Tom
         u(1, n) = 0;
-        u(Nx, n) = Tom; % Tom doesn't like bigT very much...
+        u(Nx, n) = Tom;
     end
 end
