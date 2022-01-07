@@ -39,8 +39,8 @@ function [u, x, t] = heat_explicit(L, Nx, T, Nt, alpha, Tom)
         bigT(i, i+1) = r;
     end
     % element (1,2) and (Nx, Nx-1) have not yet been set to r, however,
-    % these do not matter, as we'll set them to the border conditions
-    % (either 0 or Tom).
+    % these do not matter, as we'll overwrite the values calculated by
+    % these rows by the border conditions
 
     % 5. Calculate the rest of matrix u using matrix bigT
     for n = 2:Nt
