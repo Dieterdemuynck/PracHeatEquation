@@ -1,4 +1,4 @@
-function [u, x, t] = heat_implicit(L, Nx, T, Nt, alpha, Tom)
+function [u, x, t] = convheat_implicit(L, Nx, T, Nt, alpha, Tom, H, K)
     % OUTPUTS:
     % u = matrix of Nx by Nt with in the n-th column the solution after
     % n-th timesteps.
@@ -12,6 +12,8 @@ function [u, x, t] = heat_implicit(L, Nx, T, Nt, alpha, Tom)
     % Nt = amount of discrete points in time
     % alpha = diffusivity constant
     % Tom = a nice guy- I mean, the ambient temperature
+    % H = heat transfer coefficient
+    % K = heat conduction coefficient
     %
     % ASSUMED GLOBAL VARIABLES:
     % initval(x), a function which maps each position x between 0 and L to
@@ -28,7 +30,6 @@ function [u, x, t] = heat_implicit(L, Nx, T, Nt, alpha, Tom)
     u(:, 1) = initval(x);
     
     % 3. Set edge values to correct values
-    u(1, 1) = 0;
     u(Nx, 1) = Tom;
 
     % 4. Calculate the matrix bigA
@@ -38,9 +39,12 @@ function [u, x, t] = heat_implicit(L, Nx, T, Nt, alpha, Tom)
         bigA(i, i-1) = -r;
         bigA(i, i+1) = -r;
     end
-    % Set first and last row to those of the unit matrix:
-    bigA(1, 1) = 1;
+    % Set the last row to those of the unit matrix:
     bigA(Nx, Nx) = 1;
+    % Set the first row to the requested calculation for the convection
+    % term
+    q = 2 .* H .* delta_x.^2 / K;
+    bigA(1, 1:2) = [1 + r .* (2 + q), - 2 .* r];
 
     % 5. Calculate the matrix bigB to easily create the vector b
     bigB = (1-2.*r) .* eye(Nx);
@@ -48,16 +52,17 @@ function [u, x, t] = heat_implicit(L, Nx, T, Nt, alpha, Tom)
         bigB(i, i-1) = r;
         bigB(i, i+1) = r;
     end
-    % To simplify calculation. The values calculated by these rows will be
-    % overwritten.
-    bigB(1, 1) = 0;
+    % To simplify calculation.
     bigB(Nx, Nx) = 0;
+    % Including calculation for the convection term
+    % Note: no constant term has been added yet.
+    bigB(1, 1:2) = [1 - r .* (2 + q), 2 .* r];
 
     % 6. Solve the equation using the almost-tridiagonal matrix bigA:
     for n = 2:Nt
         % 6.1: Calculate vector b
         b = bigB * u(:, n-1);
-        b(1) = 0;  % condition at x = 0
+        b(1) = b(1) + 2 .* r .* q .* Tom;  % constant term for condition at x = 0
         b(Nx) = Tom;  % condition at x = L
 
         % 6.2 Create extended matrix and solve
