@@ -187,7 +187,7 @@ Hierbij is $T$ een matrix waarbij de diagonaalelementen gelijk zijn aan $1-2r$ e
 Merk op dat er een probleem optreed bij de randwaarden, waar $i = 0$ en $i = N_x-1$. Om bijvoorbeeld $u_0^{n+1}$ te berekenen, zijn er waarden nodig die buiten het toegelaten interval voor x liggen. Echter is dit geen probleem, aangezien deze elementen gekend zijn door de opgelegde randvoorwaarden en hoeven ze dus niet berekend te worden a.d.h.v. de recursieformule.
 
 \subsubsection{Implementatie bij constante randvoorwaarden}
-\label{sec:impl_expl_constant}
+\label{sec:implementatie_expliciet_constant}
 
 De implementatie \path{heat_explicit.m} (zie Appendix \ref{code:heat_explicit}) voor het numeriek berekenen van de warmtevergelijking in 1D werkt als volgt: \\
 De lengte van de staaf, de tijd tot wanneer we de warmteverspreiding willen simuleren en het aantal stappen, samen met de diffusiviteit van de staaf worden allen ingegeven als constanten. De constante randvoorwaarde $u = T_{om}$ wordt gevraagd voor positie $x = L$ voor alle $t \in [0, T]$, en op positie $x = 0$ wordt ervan uitgegaan dat daar de constante randvoorwaarde $u = 0$ geldt voor alle $t \in [0, T]$. De beginvoorwaarden worden niet rechtstreeks meegegeven, maar eerder als een aparte functie \path{initval(x)} die bij het document zit. Er wordt gevraagd dat deze functie de positie $x$ afbeeldt op de begintemperatuur van de staaf op die positie. De functie \path{heat_explicit} zal zelf de randvoorwaarden gebruiken om de initiële waarden te overschrijven, zodat de gebruiker niet per se een functie moet opstellen die aan deze randvoorwaarden voldoet.
@@ -196,22 +196,23 @@ De lengte van de staaf, de tijd tot wanneer we de warmteverspreiding willen simu
 
 Stel dat op $x = 0$ de randvoorwaarde een convectie vergelijking is, zoals
 
-\begin{equation*}
+\begin{equation}
 	\frac{\partial u(0, t)}{\partial x} = \frac{H}{K}\left[u(0, t) - T_{omgeving}\right]
-\end{equation*}
+	\label{eq:convection_term}
+\end{equation}
 
 Bij het toepassen van centrale differenties op de afgeleide in bovenstaande vergelijking geldt:
 
 \begin{equation*}
-	\partial_x u_0^n = \frac{u_1^n - u_{-1}^n}{2(\Delta x)^2}
+	\partial_x u_0^n \approx \frac{u_1^n - u_{-1}^n}{2(\Delta x)^2}
 \end{equation*}
 
 waardoor
 
 \begin{align*}
-	\frac{u_1^n - u_{-1}^n}{2(\Delta x)^2} &= \frac{H}{K}\left[u(0, t) - T_{omgeving}\right] \\
+	\frac{u_1^n - u_{-1}^n}{2(\Delta x)^2} &\approx \frac{H}{K}\left[u(0, t) - T_{omgeving}\right] \\
 	\Leftrightarrow \qquad
-	u_{-1}^n &= 
+	u_{-1}^n &\approx 
 	\frac{2 H (\Delta x)^2}{K} T_{omgeving} 
 	- \frac{2 H (\Delta x)^2}{K} u_0^n
 	+ u_1^n
@@ -220,7 +221,7 @@ waardoor
 Stel $q = \frac{2 H (\Delta x)^2}{K}$, dan is de vergelijking te schrijven als
 
 \begin{equation}
-	u_{-1}^n = q T_{omgeving} - q u_0^n + u_1^n
+	u_{-1}^n \approx q T_{omgeving} - q u_0^n + u_1^n
 	\label{eq:convection_diff}
 \end{equation}
 
@@ -246,7 +247,7 @@ Wanneer we daarin vergelijking \ref{eq:convection_diff} toepassen, resulteert di
 \end{align*}
 
 Door gebruik te maken van de beginvoorwaarde in $u(0, 0)$ kunnen we zo dus recursief de temperatuur op een volgend tijdstip op positie 0 berekenen. Door de eerste twee elementen op de eerste rij van de matrix $T$ aan te passen naar $(1 - (2 + q)r)$ voor het eerste element en $2r$ voor het tweede, deze matrix te vermenigvuldigen met de temperatuurvector op het huidig tijdstip, en daarna bij het eerste element (wat de temperatuur op positie $x = 0$ op een volgend tijdstip voorstelt) nog $r q T_{omgeving}$ op te tellen, bekomen we onmiddellijk de correcte temperatuur. \\
-De implementatie zal dan ook verschillen met de implementatie bij constante randvoorwaarden \ref{code:heat_explicit}(zie sectie \ref{sec:impl_expl_constant}) enkel en alleen bij de stappen uitgelegd in vorige paragraaf. De code voor deze implementatie is te vinden in appendix \ref{code:convheat_explicit}.
+De implementatie met de convectieterm zal dan ook verschillen met de implementatie bij constante randvoorwaarden \ref{code:heat_explicit}(zie sectie \ref{sec:implementatie_expliciet_constant}) enkel en alleen bij de stappen uitgelegd in vorige paragraaf. De code voor deze implementatie is te vinden in appendix \ref{code:convheat_explicit}.
 
 \subsection{Impliciete numerieke simulatie}
 
@@ -286,7 +287,7 @@ Deze formules ingeven in de warmtevergelijking \ref{eq:1D_heat} en de hogere ord
 
 Stel $r = \frac{\alpha \Delta t}{(\Delta x)^2}$, dan is deze vergelijking gelijk aan
 
-\begin{equation*}
+\begin{equation}
 	- r u_{i-1}^{n+1}
 	+ \left(1 + 2r\right) u_i^{n+1}
 	- r u_{i+1}^{n+1}
@@ -294,7 +295,8 @@ Stel $r = \frac{\alpha \Delta t}{(\Delta x)^2}$, dan is deze vergelijking gelijk
 	r u_{i-1}^n
 	+ \left(1 - 2 r\right) u_i^n
 	+ r u_{i+1}^n
-\end{equation*}
+	\label{eq:implicit_recursive}
+\end{equation}
 
 \begin{figure}
 	\centering
@@ -370,6 +372,7 @@ en
 Merk weer op dat dit problemen veroorzaakt op de rand van het ruimtelijk interval, maar opnieuw zal dit niet belangrijk zijn dankzij de opgelegde randvoorwaarden. 
 
 \subsubsection{Implementatie bij constante randvoorwaarden}
+\label{sec:implementatie_impliciet_constant}
 
 Om de waarden $u_i^{n+1}$ uit formule \ref{eq:impl_matrix} te bereken moet een stelsel opgelost worden. Dit maakt het moeilijker om de randvoorwaarden toe te passen tijdens de implementatie: de waarden tussen de randen op een volgend tijdstip zijn nu ook afhankelijk van de waarden op de randen op dit volgend tijdstip. In de expliciete methode\ref{sec:impl_expl_constant} was dit niet het geval, daar konden we de randwaarden simpelweg overschrijven met de opgelegde randvoorwaarden na de berekeningen. \\
 Het stelsel zal lichtjes moeten aangepast worden om de randvoorwaarden toe te passen tijdens de berekeningen. Aangezien we uitgaan van constante randvoorwaarden $u(0, t) = 0$ en $u(L, t) = T_{omgeving}$, kunnen we dit noteren in het stelsel door de eerste rij en de laatste rij in de matrix $A$ te vervangen door
@@ -380,11 +383,43 @@ respectievelijk
 $\big(\begin{smallmatrix}
 	0 & \dots & 0 & 0 & 1
 \end{smallmatrix}\big)$
-. Daarbij kunnen we dan $b_0^n$ en $b_{N_x - 1}^n$ gelijkstellen aan $0$ respectievelijk $T_{omgeving}$. Daarna hoeven we enkel een "bijna-tridiagonaal matrix" matrix op te lossen. Dit doen we door de methode van Thomas toe te passen. % TODO: REFERENCE
+. Daarbij kunnen we dan $b_0^n$ en $b_{N_x - 1}^n$ gelijkstellen aan $0$ respectievelijk $T_{omgeving}$. Daarna hoeven we enkel een stelsel op te lossen. Dit doen we door de ingebouwde functie \path{rref(A)} van \textit{MatLab} toe te passen op de uitgebreide matrix, en de laatste kolom te beschouwen.
 
 \subsubsection{Implementatie bij convectie-randvoorwaarde}
 
-text
+Stel dat we in formule \ref{eq:implicit_recursive} weer $i = 0$ stellen. Dan bekomen we
+
+\begin{equation*}
+	- r u_{-1}^{n+1}
+	+ \left(1 + 2r\right) u_0^{n+1}
+	- r u_1^{n+1}
+	\approx
+	r u_{-1}^n
+	+ \left(1 - 2 r\right) u_0^n
+	+ r u_1^n
+\end{equation*}
+
+We kunnen dan formule \ref{eq:convection_diff} toepassen om de termen met $i = -1$ om te vormen naar waarden die we wel kennen of kunnen berekenen:
+
+\begin{align*}
+	- r \left(q T_{omgeving} - q u_0^{n+1} + u_1^{n+1}\right)
+	+ \left(1 + 2r\right) u_0^{n+1}
+	- r u_1^{n+1}
+	&\approx
+	r \left(q T_{omgeving} - q u_0^n + u_1^n\right)
+	+ \left(1 - 2 r\right) u_0^n
+	+ r u_1^n \\
+	\Leftrightarrow \qquad
+	\left(1 + r (2 + q)\right) u_0^{n+1}
+	- 2 r u_1^{n+1}
+	&\approx
+	\left(1 - r (2 + q)\right) u_0^n
+	+ 2 r u_1^n
+	+ 2 r q T_{omgeving}
+\end{align*}
+
+Waarbij opnieuw $q = \frac{2 H (\Delta x)^2}{K}$.\\*
+Door de eerste twee termen in de eerste rij in de matrix A in formule \ref{eq:impl_matrix} te vervangen met de coëfficiënten zoals hierboven beschreven, en de term $b_0^n$ gelijk te stellen aan het rechterlid, kunnen we de convectieterm voor $x=0$ toepassen in de berekeningen. We gebruiken dezelfde methode beschreven in sectie \ref{sec:implementatie_impliciet_constant} voor de randwaarde in $x = L$ en voor het stelsel op te lossen.
 
 \section*{Besluit}
 
@@ -394,13 +429,24 @@ Afsluitende tekst.
 
 \appendix
 
-\section{File: heat\textunderscore explicit.m}
+\section{Bestand: heat\textunderscore explicit.m}
 	\label{code:heat_explicit}
 	\inputcode{heat_explicit}
-	
-\section{File: convheat\textunderscore explicit.m}
+
+\newpage
+\section{Bestand: convheat\textunderscore explicit.m}
 	\label{code:convheat_explicit}
 	\inputcode{convheat_explicit}
+	
+\newpage
+\section{Bestand: heat\textunderscore implicit.m}
+	\label{code:heat_implicit}
+	\inputcode{heat_implicit}
+	
+% \newpage
+% \section{File: convheat\textunderscore implicit.m}
+% \label{code:convheat_implicit}
+% \inputcode{convheat_implicit}
 	
 
 \end{document}
