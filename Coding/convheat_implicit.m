@@ -1,7 +1,7 @@
 function [u, x, t] = convheat_implicit(L, Nx, T, Nt, alpha, Tom, H, K)
     % OUTPUTS:
     % u = matrix of Nx by Nt with in the n-th column the solution after
-    % n-th timesteps.
+    % n-th timestep.
     % x = array of length Nx with coordinates of discrete points in space
     % t = array of length Nt with coordinates of discrete points in time
     % 
