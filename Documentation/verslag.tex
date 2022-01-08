@@ -24,7 +24,6 @@
 \title{Practicum: De Warmtevergelijking}
 \author{Dieter Demuynck}
 
-
 \begin{document}
 
 \maketitle
@@ -90,6 +89,7 @@ Stellen we $\alpha = \frac{k}{c \rho}$ geeft dit de warmtevergelijking in 1 dime
 Hierbij noemt $\alpha$ de warmtediffusiviteit. % TODO: Understand wtf is going on...
 
 \subsection{Expliciete numerieke simulatie}
+\label{sec:explicit_numerical_simul}
 
 Om de één-dimensionale warmtevergelijking numeriek op te lossen zullen we gebruik maken van de formules voor voorwaartse differenties, en centrale differenties voor equidistante punten, elk voor de afgeleide in de tijd respectievelijk voor de (tweede) afgeleide in de ruimte. % TODO: Reference book p136
 We noemen deze methode expliciet wegens de manier waarop we elke waarde op een volgend tijdstip berekenen. Uiteindelijk bekomen we een formule van de vorm % TODO: reference wikipedia explicit vs implicit
@@ -131,17 +131,17 @@ Stel $r = \frac{\alpha \Delta t}{(\Delta x)^2}$, dan is deze vergelijking makkel
 	\stencilpt[red]{-1, 0}{i-1}{$u_{i-1}^n$};
 	\stencilpt[red]{0, 0}{i}{$u_i^n$};
 	\stencilpt[red]{1, 0}{i+1}{$u_{i+1}^n$};
-	\stencilpt{0, 1}{j+1}{$u_i^{n+1}$};
+	\stencilpt[green]{0, 1}{j+1}{$u_i^{n+1}$};
 	
 	\draw (i-1) -- (i)
 	(i)	-- (i+1)
 	(i)	-- (j+1);
 \end{tikzpicture}
-\label{fig:stencil_explicit}
 \caption{Stencil voor het berekenen van een waarde $u_i^{n+1}$ op een volgend tijdstip met index n+1 met behulp van de expliciete methode}
+\label{fig:stencil_explicit}
 \end{figure}
 
-Dit is een formule om de warmte op een punt x op volgend tijdstip te berekenen aan de hand van de warmte in het punt x, links van x en recht van x op het huidig tijdstip. Figuur \ref{fig:stencil_explicit} geeft een grafische voorstelling van deze bewerking onder de vorm van een stencil. \\
+Dit is een formule om de warmte op een punt x op volgend tijdstip te berekenen aan de hand van de warmte in het punt x, links van x en recht van x op het huidig tijdstip. Figuur \ref{fig:stencil_explicit} geeft een grafische voorstelling van deze bewerking onder de vorm van een stencil. De horizontale as stelt de x-as voor, en de verticale as geeft een verplaatsing in de tijd weer. \\
 Deze recursieve formule kan worden genoteerd als een matrix matrixvermenigvuldiging
 \begin{equation}
 	% MATRIX T
@@ -190,7 +190,7 @@ Merk op dat er een probleem optreed bij de randwaarden, waar $i = 0$ en $i = N_x
 \label{sec:implementatie_expliciet_constant}
 
 De implementatie \path{heat_explicit.m} (zie Appendix \ref{code:heat_explicit}) voor het numeriek berekenen van de warmtevergelijking in 1D werkt als volgt: \\
-De lengte van de staaf, de tijd tot wanneer we de warmteverspreiding willen simuleren en het aantal stappen, samen met de diffusiviteit van de staaf worden allen ingegeven als constanten. De constante randvoorwaarde $u = T_{om}$ wordt gevraagd voor positie $x = L$ voor alle $t \in [0, T]$, en op positie $x = 0$ wordt ervan uitgegaan dat daar de constante randvoorwaarde $u = 0$ geldt voor alle $t \in [0, T]$. De beginvoorwaarden worden niet rechtstreeks meegegeven, maar eerder als een aparte functie \path{initval(x)} die bij het document zit. Er wordt gevraagd dat deze functie de positie $x$ afbeeldt op de begintemperatuur van de staaf op die positie. De functie \path{heat_explicit} zal zelf de randvoorwaarden gebruiken om de initiële waarden te overschrijven, zodat de gebruiker niet per se een functie moet opstellen die aan deze randvoorwaarden voldoet.
+De lengte van de staaf, de tijd tot wanneer we de warmteverspreiding willen simuleren en het aantal stappen, samen met de diffusiviteit van de staaf worden allen ingegeven als constanten. De constante randvoorwaarde $u = T_{om}$ wordt gevraagd voor positie $x = L$ voor alle $t \in [0, T]$, en op positie $x = 0$ wordt ervan uitgegaan dat daar de constante randvoorwaarde $u = 0$ geldt voor alle $t \in [0, T]$. De beginvoorwaarden worden niet rechtstreeks meegegeven, maar eerder als een aparte functie \path{initval(x)} die bij het document zit. Er wordt gevraagd dat deze functie de positie $x$ afbeeldt op de begintemperatuur van de staaf op die positie. De functie \path{heat_explicit} zal zelf de randvoorwaarden gebruiken om de initiële waarden te overschrijven, zodat de gebruiker niet per se een functie moet opstellen die aan deze randvoorwaarden voldoet. Na de berekeningen voor een nieuw tijdstip worden de waarden op de rand van de staaf overschreven met de opgelegde randvoorwaarden.
 
 \subsubsection{Implementatie bij convectie-randvoorwaarde}
 
@@ -304,9 +304,9 @@ Stel $r = \frac{\alpha \Delta t}{(\Delta x)^2}$, dan is deze vergelijking gelijk
 		\stencilpt[red]{-1, 0}{i-1}{$u_{i-1}^n$};
 		\stencilpt[red]{0, 0}{i}{$u_i^n$};
 		\stencilpt[red]{1, 0}{i+1}{$u_{i+1}^n$};
-		\stencilpt[red]{-1, 1}{i-1 j+1}{$u_{i-1}^{n+1}$};
-		\stencilpt[red]{0, 1}{j+1}{$u_i^{n+1}$};
-		\stencilpt[red]{1, 1}{i+1 j+1}{$u_{i+1}^{n+1}$};
+		\stencilpt[green]{-1, 1}{i-1 j+1}{$u_{i-1}^{n+1}$};
+		\stencilpt[green]{0, 1}{j+1}{$u_i^{n+1}$};
+		\stencilpt[green]{1, 1}{i+1 j+1}{$u_{i+1}^{n+1}$};
 		
 		\draw (i-1) -- (i)
 		(i)	-- (i+1)
@@ -314,11 +314,11 @@ Stel $r = \frac{\alpha \Delta t}{(\Delta x)^2}$, dan is deze vergelijking gelijk
 		(j+1) --  (i-1 j+1)
 		(j+1) -- (i+1 j+1);
 	\end{tikzpicture}
-	\label{fig:stencil_implicit}
 	\caption{Stencil voor het berekenen van een waarde $u_i^{n+1}$ op een volgend tijdstip met index n+1 met behulp van de impliciete methode}
+	\label{fig:stencil_implicit}
 \end{figure}
 
-Een grafische voorstelling van de waarden die worden gebruikt tijdens elke berekening is te vinden op figuur \ref{fig:stencil_implicit}. \\
+Een grafische voorstelling van de waarden die worden gebruikt tijdens elke berekening is te vinden op figuur \ref{fig:stencil_implicit}. Opnieuw stelt de horizontale as de x-as voor en de verticale as de tijds-as. \\
 De vergelijking kunnen we ook in matrixvorm schrijven als
 
 \begin{equation}
@@ -374,7 +374,7 @@ Merk weer op dat dit problemen veroorzaakt op de rand van het ruimtelijk interva
 \subsubsection{Implementatie bij constante randvoorwaarden}
 \label{sec:implementatie_impliciet_constant}
 
-Om de waarden $u_i^{n+1}$ uit formule \ref{eq:impl_matrix} te bereken moet een stelsel opgelost worden. Dit maakt het moeilijker om de randvoorwaarden toe te passen tijdens de implementatie: de waarden tussen de randen op een volgend tijdstip zijn nu ook afhankelijk van de waarden op de randen op dit volgend tijdstip. In de expliciete methode\ref{sec:impl_expl_constant} was dit niet het geval, daar konden we de randwaarden simpelweg overschrijven met de opgelegde randvoorwaarden na de berekeningen. \\
+Om de waarden $u_i^{n+1}$ uit formule \ref{eq:impl_matrix} te bereken in de implementatie \ref{code:heat_implicit} moet een stelsel opgelost worden. Dit maakt het moeilijker om de randvoorwaarden toe te passen tijdens de implementatie: de waarden tussen de randen op een volgend tijdstip zijn nu ook afhankelijk van de waarden op de randen op dit volgend tijdstip. In de expliciete methode\ref{sec:impl_expl_constant} was dit niet het geval, daar konden we de randwaarden simpelweg overschrijven met de opgelegde randvoorwaarden na de berekeningen. \\
 Het stelsel zal lichtjes moeten aangepast worden om de randvoorwaarden toe te passen tijdens de berekeningen. Aangezien we uitgaan van constante randvoorwaarden $u(0, t) = 0$ en $u(L, t) = T_{omgeving}$, kunnen we dit noteren in het stelsel door de eerste rij en de laatste rij in de matrix $A$ te vervangen door
 $\big(\begin{smallmatrix}
 	1 & 0 & 0 & \dots & 0
@@ -419,7 +419,111 @@ We kunnen dan formule \ref{eq:convection_diff} toepassen om de termen met $i = -
 \end{align*}
 
 Waarbij opnieuw $q = \frac{2 H (\Delta x)^2}{K}$.\\*
-Door de eerste twee termen in de eerste rij in de matrix A in formule \ref{eq:impl_matrix} te vervangen met de coëfficiënten zoals hierboven beschreven, en de term $b_0^n$ gelijk te stellen aan het rechterlid, kunnen we de convectieterm voor $x=0$ toepassen in de berekeningen. We gebruiken dezelfde methode beschreven in sectie \ref{sec:implementatie_impliciet_constant} voor de randwaarde in $x = L$ en voor het stelsel op te lossen.
+Door de eerste twee termen in de eerste rij in de matrix A in formule \ref{eq:impl_matrix} te vervangen met de coëfficiënten zoals hierboven beschreven, en de term $b_0^n$ gelijk te stellen aan het rechterlid, kunnen we de convectieterm voor $x=0$ toepassen in de berekeningen. We gebruiken dezelfde methode beschreven in sectie \ref{sec:implementatie_impliciet_constant} voor de randwaarde in $x = L$ en voor het stelsel op te lossen. De implementatie hiervan is te vinden in appendix \ref{code:convheat_implicit}
+
+\section{Warmtevergelijking in 2D}
+
+
+
+De warmtevergelijking in 2D ziet er als volgt uit:
+
+\begin{equation}
+	\frac{\partial u(x, y, t)}{\partial t} = \alpha \left( \frac{\partial^2u(x, y, t)}{\partial x^2}
+	+ \frac{\partial^2u(x, y, t)}{\partial y^2}
+	\right)
+	\label{eq:2D_heat}
+\end{equation}
+
+We geven geen bewijs van deze vergelijking in dit verslag. We zullen deze vergelijking oplossen voor een eenheidsvierkant $[0, 1] \times [0, 1]$ met volgende randvoorwaarden:
+
+\begin{align}
+	u(x, 0, t) = u(x, 1, t) &= 0 
+	\label{eq:2D_border_y}\\
+	u(0, y, t) &= sin(\pi y) 
+	\label{eq:2D_border_x_0}\\
+	\frac{\partial u(1, y, t)}{\partial x} &= \frac{H}{K} \left(u(1, y, t) - T_{omgeving}\right)
+	\label{eq:2D_border_x_1}
+\end{align}
+
+en volgende beginvoorwaarde:
+
+\begin{equation}
+	u(x, y, 0) = 0
+	\label{eq:2D_init}
+\end{equation}
+
+We zullen een recursiemethode opstellen om deze vergelijking met de begin- en randvoorwaarden numeriek te berekenen. We herdefiniëren de notatie voor de waarde $u(x_i, y_j, t_n)$ als $u_{i, j}^n$ waarbij $x_i, y_j, t_n$ op een analoge manier zijn gedefinieerd als bij sectie \ref{sec:explicit_numerical_simul}. Ook op een analoge manier als bij de formules \ref{eq:diff_time} en \ref{eq:diff_space} vinden we dat
+
+\begin{align*}
+	\frac{u_{i, j}^{n+1} - u_{i, j}^n}{\Delta t} 
+	&\approx 
+	\alpha \left(
+	\frac{u_{i-1, j}^n - 2 u_{i, j}^n + u_{i+1, j}^n}{(\Delta x)^2}
+	+ \frac{u_{i, j-1}^n - 2 u_{i, j}^n + u_{i, j+1}^n}{(\Delta y)^2}
+	\right) \\
+	\Leftrightarrow \qquad
+	u_{i, j}^{n+1}
+	&\approx
+	\frac{\alpha \Delta t}{(\Delta x)^2} \left(
+	u_{i-1, j}^n - 2 u_{i, j}^n + u_{i+1, j}^n \right)
+	+ \frac{\alpha \Delta t}{(\Delta y)^2} \left(
+	u_{i, j-1}^n - 2 u_{i, j}^n + u_{i, j+1}^n
+	\right) + u_{i, j}^n
+\end{align*}
+
+Stel $r_x = \frac{\alpha \Delta t}{(\Delta x)^2}$ en $r_y = \frac{\alpha \Delta t}{(\Delta y)^2}$, dan geldt:
+
+\begin{equation}
+	u_{i, j}^{n+1}
+	\approx
+	r_x \left( u_{i-1, j}^n + u_{i+1, j}^n \right)  % x differs
+	+ r_y \left( u_{i, j-1}^n + u_{i, j+1}^n \right)  % y differs
+	+ (1 - 2r_x - 2r_y) u_{i, j}^n  % equal terms
+\end{equation}
+
+\begin{figure}
+\centering
+	\begin{tikzpicture}[scale=2]
+		\stencilpt[red]{-1, 1}{i-1}{$u_{i-1, j}^n$};
+		\stencilpt[red]{0, 1}{i}{$u_{i, j}^n$};
+		\stencilpt[red]{1, 1}{i+1}{$u_{i+1, j}^n$};
+		\stencilpt[red]{0, 2}{j+1}{$u_{i, j+1}^n$};
+		\stencilpt[red]{0, 0}{j-1}{$u_{i, j-1}^n$};
+		\stencilpt[green]{1, 2}{n}{$u_{i, j}^{n+1}$};
+		
+		\draw (i) -- (i-1)
+		(i)	-- (i+1)
+		(i)	-- (j+1)
+		(i) -- (j-1);
+		\draw [dashed] (i) -- (n);
+	\end{tikzpicture}
+\caption{Stencil voor het berekenen van een waarde $u_{i, j}^{n+1}$ op een volgend tijdstip met index n+1 voor de twee-dimensionale warmtevergelijking}
+\label{fig:stencil_2D}
+\end{figure}
+
+Figuur \ref{fig:stencil_2D} geeft een grafische weergave van de waarden die gebruikt worden of berekend worden tijdens de berekening. In dit stencil stelt de horizontale as de x-as voor, de verticale de y-as en de stippellijn stelt een verplaatsing in de tijd voor. Merk wel op dat de stippellijn in de realiteit eigenlijk loodrecht uit het blad zou moeten komen, en dat de groene knoop in werkelijkheid zich recht boven de verbonden rode knoop bevindt.
+
+\subsection{Implementatie}
+
+Wanneer $n = 0$ of $j = 0$ of $j = N_y$ geldt door de begin- en randvoorwaarden dat $u_{i, j}^n = 0$, en wanneer $i = 0$ geldt dat $u_{i, j}^n = sin(\pi y)$, wat ook voldoet aan de daarnet vermelde voorwaarden. Deze waarden kunnen we expliciet invullen tijdens de berekeningen. Enkel de convectie term \ref{eq:2D_border_x_1} brengt nog problemen. Op een analoge manier als voor de berekeningen voor formule \ref{eq:convection_diff} kunnen we een formule opstellen voor de termen $u_{N_x + 1, j}^n$:
+
+\begin{equation}
+	u_{N_x + 1, j}^n 
+	\approx
+	q_x u_{N_x, j}^n + u_{N_x - 1, j}^n - q_x T_{omgeving}
+\end{equation}
+
+waarbij opnieuw $q_x = \frac{H (\Delta x)^2}{K}$. Dit resulteert dan uiteindelijk in de expliciete formule
+
+\begin{equation}
+	u_{N_x, j}^{n+1}
+	\approx
+	r_y u_{N_x, j-1}^n + r_y u_{N_x, j+1}^n  % y differs
+	+ 2 r_x u_{N_x - 1, j}^n % x differ
+	+ \left(1 + r_x(q - 2) - 2 r_y\right) u_{N_x, j}^n  % equal term
+\end{equation}
+
+Aan de hand van deze formules kunnen we de temperatuur in de plaat berekenen. De implementatie is te vinden in Appendix \ref{code:heat2d}. In plaats van 1 grote matrix $T$ te gebruiken voor de berekeningen door die te vermenigvuldigen met de waarden op een huidig tijdstip, zullen we de waarden 1 voor 1 berekenen via de vermelde formules.
 
 \section*{Besluit}
 
@@ -443,10 +547,14 @@ Afsluitende tekst.
 	\label{code:heat_implicit}
 	\inputcode{heat_implicit}
 	
-% \newpage
-% \section{File: convheat\textunderscore implicit.m}
-% \label{code:convheat_implicit}
-% \inputcode{convheat_implicit}
+\newpage
+\section{Bestand: convheat\textunderscore implicit.m}
+\label{code:convheat_implicit}
+\inputcode{convheat_implicit}
+
+\section{Bestand: heat2d.m}
+\label{code:heat2d}
+\inputcode{heat2d}
 	
 
 \end{document}
