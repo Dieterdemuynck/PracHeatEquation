@@ -3,8 +3,14 @@ function plotheat1d(x, t, u, frames)
     % frames. The plottype used is a heatmap.
     
     % 1. Create transposed copy of u with only the requested frames
+    frames = flip(frames);
     data = (u(:, frames))';
 
     % 2. Plot the data on a heatmap
-    heatmap("x = " + x, "t = " + t(frames), data);
+    h = heatmap(x, t(frames), data);
+    
+    % 3. Adjust axis titles and colormap colors
+    h.XLabel = "Position in rod";
+    h.YLabel = "Elapsed time";
+    colormap default;
 end

@@ -1,15 +1,14 @@
 function plotheat3d(x, t, u)
     % Plots the values of u(x, t) on a 3D waterfall plot.
-    mesh(u)
-    % Edit the axis to show correct values
-    x_tick_difference = idivide(int16(length(x)), int16(15));
-    t_tick_difference = idivide(int16(length(t)), int16(30));
-    x_ticks = 0:x_tick_difference:length(x);
-    t_ticks = 1:t_tick_difference:length(t);
-
+    mesh(x, t, u')
+    % Edit the axis
     ax = gca;
-    ax.YTick = x_ticks;
-    ax.XTick = t_ticks;
-    ax.YTickLabel = "x = " + x(x_ticks+1);
-    ax.XTickLabel = "t = " + t(t_ticks);
+    ax.XLabel.String = "Position in rod";
+    ax.XLabel.FontSize = 12;
+    ax.YLabel.String = "Elapsed time";
+    ax.YLabel.FontSize = 12;
+    ax.ZLabel.String = "Temperature";
+    ax.ZLabel.FontSize = 12;
+    
+    colorbar
 end
